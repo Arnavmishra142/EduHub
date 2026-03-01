@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduHub Reader</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css"> </head>
+<body class="reader-body">
+
+    <div class="reader-topbar" id="readerTopbar">
+        <div class="reader-left">
+            <button class="icon-btn" id="backBtn" title="Go Back">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+            <h1 class="reader-book-title" id="rTitle">Loading Book...</h1>
+        </div>
+
+        <div class="reader-right">
+            <button class="icon-btn" id="modeBtn" style="display: none;" title="Change Mode">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="12" y1="3" x2="12" y2="21"></line></svg>
+            </button>
+            
+            <button class="icon-btn download-btn" id="rDownloadBtn" title="Download">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                <span>Save</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="reader-container" id="readerContainer">
+        
+        <div class="reader-loader" id="rLoader">
+            <div class="spinner"></div>
+            <p id="loaderText">Preparing your premium reading experience...</p>
+        </div>
+
+        <div id="pdfWrapper" class="content-wrapper" style="display: none;">
+            </div>
+
+        <div id="mangaWrapper" class="content-wrapper manga-mode" style="display: none;">
+            </div>
+
+    </div>
+
+    <script src="reader.js"></script>
+</body>
+</html>
