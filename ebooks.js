@@ -17,55 +17,38 @@ let currentBookTitle = '';
 
 // ==================== INITIALIZATION ====================
 document.addEventListener('DOMContentLoaded', () => {
-    // Page load hote hi kuch badhiya "Suggested" books layega
-    fetchBooks('success', 'search'); // 'success' is a good keyword for self-help/growth classics
+    // Page load hote hi badhiya books suggest hongi
+    fetchBooks('success', 'search'); 
 });
 
 // ==================== EVENT LISTENERS ====================
-
-// 1. Search Button Click
 searchBtn.addEventListener('click', () => {
     const query = searchInput.value.trim();
-    if (query) {
-        removeChipSelection();
-        fetchBooks(query, 'search');
-    }
+    if (query) { removeChipSelection(); fetchBooks(query, 'search'); }
 });
 
-// 2. Enter Key in Search
 searchInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
         const query = searchInput.value.trim();
-        if (query) {
-            removeChipSelection();
-            fetchBooks(query, 'search');
-        }
+        if (query) { removeChipSelection(); fetchBooks(query, 'search'); }
     }
 });
 
-// 3. Category Chips Click
 categoryChips.forEach(chip => {
     chip.addEventListener('click', () => {
-        // Toggle Active Class
         removeChipSelection();
         chip.classList.add('active');
-        
-        // Clear Search Box
         searchInput.value = '';
-        
-        const topic = chip.getAttribute('data-topic');
-        fetchBooks(topic, 'topic');
+        fetchBooks(chip.getAttribute('data-topic'), 'topic');
     });
 });
 
-// 4. Reader Close Button
 closeReaderBtn.addEventListener('click', () => {
     readerOverlay.classList.remove('active');
-    readerContent.innerHTML = ''; // Clear iframe memory
+    readerContent.innerHTML = ''; // Memory clear karne ke liye
     document.body.style.overflow = ''; 
 });
 
-// 5. Download PDF Button (Inside Reader)
 downloadBtn.addEventListener('click', () => {
     if(currentDownloadUrl) {
         forceDownload(currentDownloadUrl, `${currentBookTitle}.epub`, downloadBtn);
@@ -74,59 +57,54 @@ downloadBtn.addEventListener('click', () => {
     }
 });
 
-// ==================== CORE API ENGINE (GUTENDEX) ====================
+// ==================== CORE API ENGINE ====================
 async function fetchBooks(query, type) {
-    // Show Loader, Hide Grid
     ebooksGrid.innerHTML = '';
     loadingIndicator.style.display = 'block';
 
-    let apiUrl = '';
-    if (type === 'search') {
-        apiUrl = `https://gutendex.com/books/?search=${encodeURIComponent(query)}`;
-    } else if (type === 'topic') {
-        apiUrl = `https://gutendex.com/books/?topic=${encodeURIComponent(query)}`;
-    }
+    let apiUrl = type === 'search' 
+        ? `https://gutendex.com/books/?search=${encodeURIComponent(query)}` 
+        : `https://gutendex.com/books/?topic=${encodeURIComponent(query)}`;
 
     try {
         const response = await fetch(apiUrl);
-        if (!response.ok) throw new Error("Network response was not ok");
-        
+        if (!response.ok) throw new Error("Network issue");
         const data = await response.json();
-        const books = data.results;
-
+        
         loadingIndicator.style.display = 'none';
 
-        if (books.length === 0) {
-            ebooksGrid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #a1a1aa; padding: 3rem;">No books found for "${query}". Try another keyword.</div>`;
+        if (data.results.length === 0) {
+            ebooksGrid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #a1a1aa; padding: 3rem;">No books found. Try another keyword.</div>`;
             return;
         }
 
-        renderBooks(books);
+        renderBooks(data.results);
 
     } catch (error) {
         loadingIndicator.style.display = 'none';
-        ebooksGrid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #ef4444; padding: 3rem;">⚠️ Failed to fetch books. Please check your internet.</div>`;
-        console.error("Error fetching books:", error);
+        ebooksGrid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #ef4444; padding: 3rem;">⚠️ Failed to fetch books. Check your internet.</div>`;
     }
 }
 
 // ==================== RENDER BOOKS TO UI ====================
 function renderBooks(books) {
-    ebooksGrid.innerHTML = ''; // Clear previous
+    ebooksGrid.innerHTML = ''; 
 
-    // Sirf wo books dikhayenge jinki photo available hai
+    // Filter books having an image
     const validBooks = books.filter(book => book.formats['image/jpeg']);
 
-    validBooks.slice(0, 20).forEach(book => { // Max 20 books dikhayenge for speed
+    validBooks.slice(0, 20).forEach(book => { 
         const title = book.title;
         const author = book.authors.length > 0 ? book.authors[0].name : "Unknown Author";
         const coverImg = book.formats['image/jpeg'];
         
-        // Find Read & Download Links
-        const readLink = book.formats['text/html'] || book.formats['text/html; charset=utf-8'] || book.formats['text/plain; charset=us-ascii'];
+        // Smart Format Selection (Prioritize HTML for beautiful reading)
+        const htmlLink = book.formats['text/html'] || book.formats['text/html; charset=utf-8'];
+        const textLink = book.formats['text/plain; charset=utf-8'] || book.formats['text/plain'];
+        const readLink = htmlLink || textLink;
+        
         const downloadLink = book.formats['application/epub+zip'] || book.formats['application/pdf'] || readLink;
 
-        // Create Card Element
         const card = document.createElement('div');
         card.className = 'book-card';
         card.innerHTML = `
@@ -138,13 +116,11 @@ function renderBooks(books) {
             </div>
         `;
 
-        // Add Click Event to "Read Book" Button
-        const readBtn = card.querySelector('.read-btn');
-        readBtn.addEventListener('click', () => {
+        card.querySelector('.read-btn').addEventListener('click', () => {
             if (readLink) {
-                openReader(title, readLink, downloadLink);
+                openPremiumReader(title, readLink, downloadLink);
             } else {
-                alert("Sorry, reading format is not available for this specific book.");
+                alert("Sorry, reading format is not available.");
             }
         });
 
@@ -152,20 +128,99 @@ function renderBooks(books) {
     });
 }
 
-// ==================== READER UI ====================
-function openReader(title, readUrl, dlUrl) {
+// ==================== SUPER PREMIUM CUSTOM READER ====================
+async function openPremiumReader(title, readUrl, dlUrl) {
     currentBookTitle = title;
     currentDownloadUrl = dlUrl;
-
     readerTitle.innerText = title;
     
-    // Inject iframe for reading
-    readerContent.innerHTML = `
-        <iframe src="${readUrl}" class="premium-pdf-viewer" title="${title}"></iframe>
-    `;
-
     readerOverlay.classList.add('active');
-    document.body.style.overflow = 'hidden'; // Stop background scrolling
+    document.body.style.overflow = 'hidden'; 
+    
+    // Show Loading state inside reader
+    readerContent.innerHTML = `<div class="loading-state" style="height:100%; display:flex; flex-direction:column; justify-content:center;"><div class="spinner"></div><p>Generating Premium Reading Experience...</p></div>`;
+
+    try {
+        // Step 1: Fetch Book Content via CORS Proxy to bypass security blocks
+        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(readUrl)}`;
+        const response = await fetch(proxyUrl);
+        const data = await response.json();
+        let bookHtml = data.contents;
+
+        // Step 2: Fix relative image links (like cover photos inside the book)
+        const baseUrl = readUrl.substring(0, readUrl.lastIndexOf('/') + 1);
+
+        // Step 3: Inject Premium Dark Mode & Typography Settings
+        const premiumStyling = `
+            <base href="${baseUrl}">
+            <style>
+                @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500&display=swap');
+                
+                body {
+                    background-color: #09090b !important;
+                    color: #e4e4e7 !important;
+                    font-family: 'Playfair Display', Georgia, serif !important;
+                    line-height: 1.8 !important;
+                    padding: 3rem 8% !important;
+                    max-width: 800px !important;
+                    margin: 0 auto !important;
+                    font-size: 1.15rem !important;
+                }
+                
+                h1, h2, h3, h4, h5 {
+                    color: #ffffff !important;
+                    font-family: 'Inter', sans-serif !important;
+                    text-align: center !important;
+                    margin-top: 3rem !important;
+                    margin-bottom: 1.5rem !important;
+                    font-weight: 600 !important;
+                }
+
+                p { 
+                    margin-bottom: 1.5rem !important; 
+                    text-align: justify !important; 
+                }
+
+                a { color: #c9a050 !important; text-decoration: none !important; }
+                a:hover { text-decoration: underline !important; }
+
+                hr { border: 0; border-top: 1px solid #27272a !important; margin: 3rem 0 !important; }
+                
+                img { 
+                    max-width: 100% !important; 
+                    height: auto !important; 
+                    border-radius: 8px !important;
+                    display: block;
+                    margin: 2rem auto !important;
+                }
+
+                /* Hiding Gutenberg ugly headers */
+                pre { background: #18181b !important; padding: 1rem !important; border-radius: 8px !important; font-family: monospace !important; font-size: 0.9rem !important; overflow-x: auto !important; white-space: pre-wrap !important; }
+            </style>
+        `;
+
+        // Combine HTML
+        if (bookHtml.includes('</head>')) {
+            bookHtml = bookHtml.replace('</head>', premiumStyling + '</head>');
+        } else {
+            bookHtml = premiumStyling + bookHtml; 
+        }
+
+        // Step 4: Create a clean iframe and write our Custom HTML into it
+        readerContent.innerHTML = `<iframe id="premiumFrame" style="width:100%; height:100%; border:none; background-color:#09090b;"></iframe>`;
+        
+        const frameDoc = document.getElementById('premiumFrame').contentWindow.document;
+        frameDoc.open();
+        frameDoc.write(bookHtml);
+        frameDoc.close();
+
+    } catch (error) {
+        console.error("Reader Error:", error);
+        readerContent.innerHTML = `<div style="text-align:center; padding:3rem; color:#ef4444;">
+            <h3>⚠️ Could not load the reader</h3>
+            <p style="color:#a1a1aa; margin-top:10px;">The book format might be protected or unsupported. Try downloading it instead.</p>
+        </div>`;
+    }
 }
 
 // ==================== UTILS ====================
@@ -173,13 +228,13 @@ function removeChipSelection() {
     categoryChips.forEach(c => c.classList.remove('active'));
 }
 
-// Direct Download Hack (CORS bypass fallback)
 async function forceDownload(url, filename, btnElement) {
     const originalText = btnElement.innerHTML;
     btnElement.innerHTML = `⏳ Downloading...`;
     
     try {
-        const res = await fetch(url);
+        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+        const res = await fetch(proxyUrl);
         const blob = await res.blob();
         const blobUrl = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -192,7 +247,6 @@ async function forceDownload(url, filename, btnElement) {
         btnElement.innerHTML = `✅ Downloaded!`;
     } catch (e) {
         console.log("CORS blocked Force Download, opening in new tab.", e);
-        // Fallback: Opens in new tab
         const a = document.createElement('a');
         a.href = url;
         a.target = '_blank';
@@ -202,6 +256,5 @@ async function forceDownload(url, filename, btnElement) {
         document.body.removeChild(a);
         btnElement.innerHTML = originalText;
     }
-    
     setTimeout(() => { btnElement.innerHTML = originalText; }, 3000);
 }
