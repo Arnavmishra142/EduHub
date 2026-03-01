@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=3">
 </head>
 <body>
 
@@ -39,15 +39,13 @@
             <button class="chip" data-topic="politics">Politics</button>
             <button class="chip" data-topic="history">History</button>
         </div>
-    </header>
-            </div>
 
-        <div style="margin-top: 1.5rem;">
+        <div style="margin-top: 2rem;">
             <button id="openRequestBtn" class="request-btn">
                 <span>📚</span> Can't find a book? Request Here!
             </button>
         </div>
-</header>
+    </header>
     
     <main class="container">
         <div id="loadingIndicator" class="loading-state" style="display: none;">
@@ -58,22 +56,7 @@
         <div class="ebooks-grid" id="ebooksGrid"></div>
     </main>
 
-    <div class="reader-overlay" id="readerOverlay">
-        <div class="reader-header">
-            <h3 id="readerTitle">Book Title</h3>
-            <div class="reader-actions">
-                <button id="downloadBtn" class="reader-btn download-btn">⬇️ Download File</button>
-                <button id="closeReader" class="reader-btn close-btn">✖ Close</button>
-            </div>
-        </div>
-        <div class="reader-content" id="readerContent">
-            </div>
-    </div>
-
-    <script src="ebooks.js"></script>
-            </div>
-
-        <div class="request-modal-overlay" id="requestModal">
+    <div class="request-modal-overlay" id="requestModal">
         <div class="request-modal">
             <div class="modal-header">
                 <h3>Request a Book</h3>
@@ -89,7 +72,8 @@
                 </button>
             </div>
         </div>
-        </div>
-    
+    </div>
+
+    <script src="ebooks.js"></script>
 </body>
 </html>
