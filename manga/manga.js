@@ -1,4 +1,4 @@
-// ==================== MANGADEX ENGINE ====================
+// ==================== MANGADEX PROXIED ENGINE ====================
 
 const mangaSearchInput = document.getElementById('mangaSearchInput');
 const mangaSearchBtn = document.getElementById('mangaSearchBtn');
@@ -7,7 +7,7 @@ const mangaLoader = document.getElementById('mangaLoader');
 
 // 1. Initial Load (Trending Manga)
 document.addEventListener('DOMContentLoaded', () => {
-    fetchManga('Solo Leveling'); // Default search
+    fetchManga('Solo Leveling'); 
 });
 
 // 2. Search Event Listeners
@@ -23,20 +23,28 @@ mangaSearchInput.addEventListener('keypress', (e) => {
     }
 });
 
-// 3. Core Fetch Function
+// 3. Core Fetch Function with Proxy Hack
 async function fetchManga(query) {
     mangaGrid.innerHTML = '';
     mangaLoader.style.display = 'block';
 
+    // MangaDex API Search URL
+    const apiUrl = `https://api.mangadex.org/manga?title=${encodeURIComponent(query)}&limit=20&includes[]=cover_art&contentRating[]=safe`;
+    
+    // Proxy to bypass CORS error (The Magic Ingredient)
+    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(apiUrl)}`;
+
     try {
-        // MangaDex API Search URL
-        const response = await fetch(`https://api.mangadex.org/manga?title=${encodeURIComponent(query)}&limit=20&includes[]=cover_art`);
-        const data = await response.json();
+        const response = await fetch(proxyUrl);
+        if (!response.ok) throw new Error("Proxy failed");
+        
+        const rawData = await response.json();
+        const data = JSON.parse(rawData.contents); 
         
         mangaLoader.style.display = 'none';
 
-        if (data.data.length === 0) {
-            mangaGrid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: #a1a1aa;">No Manga found. Try another title!</p>`;
+        if (!data.data || data.data.length === 0) {
+            mangaGrid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: #a1a1aa;">No Manga found. Try "Naruto" or "One Piece".</p>`;
             return;
         }
 
@@ -44,7 +52,10 @@ async function fetchManga(query) {
     } catch (error) {
         console.error("MangaDex Error:", error);
         mangaLoader.style.display = 'none';
-        mangaGrid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: #e11d48;">⚠️ Error connecting to MangaDex. Try again.</p>`;
+        mangaGrid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #e11d48; padding: 2rem;">
+            <h3>🏮 Connection to Manga Realm Failed</h3>
+            <p style="color: #a1a1aa; font-size: 0.9rem; margin-top: 10px;">The API might be down or blocked. Try refreshing after 1 minute.</p>
+        </div>`;
     }
 }
 
@@ -54,21 +65,22 @@ function renderManga(mangaList) {
 
     mangaList.forEach(manga => {
         const id = manga.id;
-        const title = manga.attributes.title.en || manga.attributes.title.ja || "Unknown Title";
+        const attributes = manga.attributes;
+        const title = attributes.title.en || attributes.title.ja || Object.values(attributes.title)[0] || "Unknown Title";
         
         // Find Cover Art filename from relationships
         const coverRel = manga.relationships.find(rel => rel.type === 'cover_art');
-        const coverFileName = coverRel ? coverRel.attributes.fileName : "";
+        const coverFileName = coverRel && coverRel.attributes ? coverRel.attributes.fileName : null;
+        
         const coverUrl = coverFileName 
             ? `https://uploads.mangadex.org/covers/${id}/${coverFileName}.256.jpg`
             : "https://via.placeholder.com/200x300?text=No+Cover";
 
         const card = document.createElement('div');
         card.className = 'manga-card';
-        // Add CSS for manga-card in your manga.css if missing
         card.innerHTML = `
             <div class="manga-cover-wrapper">
-                <img src="${coverUrl}" alt="${title}" loading="lazy">
+                <img src="${coverUrl}" alt="${title}" loading="lazy" onerror="this.src='https://via.placeholder.com/200x300?text=Cover+Not+Found'">
                 <div class="manga-overlay">
                     <button onclick="openMangaReader('${id}', '${encodeURIComponent(title)}')">Read Now</button>
                 </div>
@@ -81,8 +93,7 @@ function renderManga(mangaList) {
     });
 }
 
-// 5. Redirect to Reader (Will build next)
+// 5. Open Reader Page
 function openMangaReader(mangaId, title) {
-    // Ye user ko hamare naye manga-reader page pe bhejega
     window.location.href = `reader.html?id=${mangaId}&title=${title}`;
 }
