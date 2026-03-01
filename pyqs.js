@@ -72,7 +72,7 @@ function renderClasses(boardId) {
         card.innerHTML = `
             <div style="font-size: 2.5rem;">${cls === 'Class 12' ? '🎓' : '🎒'}</div>
             <h3>${cls}</h3>
-            <p>Select your subjects</p>
+            <p>Select your year</p> 
         `;
         card.onclick = () => renderSubjects(cls);
         contentArea.appendChild(card);
