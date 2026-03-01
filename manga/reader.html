@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manga Reader 🎌 | EduHub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            background-color: #000000; 
+            color: #f4f4f5; 
+            font-family: 'Inter', sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            overflow-x: hidden;
+        }
+        
+        /* Navbar */
+        .topbar { 
+            position: fixed; top: 0; left: 0; width: 100%; 
+            background: rgba(10, 10, 10, 0.95); backdrop-filter: blur(10px);
+            padding: 15px 20px; border-bottom: 1px solid #27272a; 
+            display: flex; justify-content: space-between; align-items: center; 
+            z-index: 1000; box-sizing: border-box;
+        }
+        .back-btn { 
+            color: #a1a1aa; text-decoration: none; font-weight: 500; font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+        .back-btn:hover { color: #e11d48; }
+        .manga-title { 
+            margin: 0; font-size: 1.1rem; color: #e11d48; 
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
+            max-width: 40vw; text-align: center; font-weight: 700;
+        }
+        
+        /* Chapter Dropdown */
+        #chapterSelect { 
+            background: #18181b; color: #fff; border: 1px solid #27272a; 
+            padding: 8px; border-radius: 8px; outline: none; font-size: 0.9rem;
+            cursor: pointer; max-width: 150px;
+        }
+        
+        /* Reader Area */
+        .reader-container { 
+            margin-top: 65px; 
+            display: flex; flex-direction: column; align-items: center; 
+            width: 100%; background: #000; min-height: 100vh;
+        }
+        .manga-page { 
+            max-width: 100vw; /* Fits mobile screen perfectly */
+            width: auto; 
+            height: auto;
+            margin-bottom: 0px; /* Seamless scrolling */
+            display: block;
+        }
+
+        /* Loading Spinner */
+        .loader { text-align: center; padding: 100px 20px; color: #a1a1aa; font-size: 1.1rem; }
+        .spinner {
+            width: 40px; height: 40px; border: 3px solid #27272a; border-top: 3px solid #e11d48;
+            border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 15px;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div class="topbar">
+        <a href="index.html" class="back-btn">← Back</a>
+        <h1 class="manga-title" id="mangaTitle">Loading...</h1>
+        <select id="chapterSelect" onchange="loadChapter(this.value)">
+            <option value="">Select Chapter</option>
+        </select>
+    </div>
+
+    <div id="loader" class="loader">
+        <div class="spinner"></div>
+        <p id="loaderText">Summoning Chapters... ⏳</p>
+    </div>
+
+    <div class="reader-container" id="readerContainer"></div>
+
+    <script>
+        // 1. Get Manga ID and Title from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const mangaId = urlParams.get('id');
+        const title = decodeURIComponent(urlParams.get('title') || 'Manga Reader');
+
+        document.getElementById('mangaTitle').innerText = title;
+        const chapterSelect = document.getElementById('chapterSelect');
+        const readerContainer = document.getElementById('readerContainer');
+        const loader = document.getElementById('loader');
+        const loaderText = document.getElementById('loaderText');
+
+        // 2. Fetch Chapters List
+        async function fetchChapters() {
+            try {
+                // Fetch only English chapters, sorted from Chapter 1 onwards
+                const apiUrl = `https://api.mangadex.org/manga/${mangaId}/feed?translatedLanguage[]=en&order[chapter]=asc&limit=100`;
+                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`;
+                
+                const res = await fetch(proxyUrl);
+                const data = await res.json();
+                
+                if (data.data && data.data.length > 0) {
+                    // Populate Dropdown
+                    data.data.forEach(chap => {
+                        let opt = document.createElement('option');
+                        opt.value = chap.id;
+                        let chapNum = chap.attributes.chapter ? `Ch. ${chap.attributes.chapter}` : 'Oneshot';
+                        opt.innerText = `${chapNum}`;
+                        chapterSelect.appendChild(opt);
+                    });
+                    
+                    // Auto-load the very first chapter
+                    chapterSelect.value = data.data[0].id;
+                    loadChapter(data.data[0].id);
+                } else {
+                    loader.innerHTML = "<h3>No English chapters found 😢</h3><p style='color:#71717a;font-size:0.9rem;'>This manga might not be translated yet.</p>";
+                }
+            } catch(e) {
+                console.error(e);
+                loader.innerText = "⚠️ Failed to load chapters. Network error.";
+            }
+        }
+
+        // 3. Fetch and Render Images for a Chapter
+        async function loadChapter(chapterId) {
+            if (!chapterId) return;
+            
+            // Reset Reader
+            readerContainer.innerHTML = '';
+            loader.style.display = 'block';
+            loaderText.innerText = "Summoning Pages... ⏳";
+
+            try {
+                // Get MangaDex Image Server links
+                const apiUrl = `https://api.mangadex.org/at-home/server/${chapterId}`;
+                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`;
+                
+                const res = await fetch(proxyUrl);
+                const data = await res.json();
+
+                loader.style.display = 'none';
+
+                const baseUrl = data.baseUrl;
+                const hash = data.chapter.hash;
+                const pages = data.chapter.data; // High-quality image array
+
+                // Display Images one by one
+                pages.forEach(page => {
+                    const imgUrl = `${baseUrl}/data/${hash}/${page}`;
+                    
+                    const img = document.createElement('img');
+                    img.src = imgUrl;
+                    img.className = 'manga-page';
+                    img.loading = 'lazy'; // Lazy loading saves internet!
+                    img.alt = "Manga Page";
+                    
+                    readerContainer.appendChild(img);
+                });
+
+                // Scroll to top when new chapter loads
+                window.scrollTo(0, 0);
+
+            } catch(e) {
+                console.error(e);
+                loader.innerText = "⚠️ Error loading pages. MangaDex servers might be down.";
+                loader.style.display = 'block';
+            }
+        }
+
+        // 4. Start Engine
+        if (mangaId) { 
+            fetchChapters(); 
+        } else { 
+            loader.innerText = "⚠️ Invalid Manga ID! Go back and try again."; 
+        }
+    </script>
+</body>
+</html>
