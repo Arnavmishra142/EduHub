@@ -131,3 +131,159 @@ body {
     .hero-title { font-size: 2.2rem; }
     .category-grid { grid-template-columns: 1fr; }
 }
+/* ==================== E-BOOKS PAGE STYLING ==================== */
+
+.back-link {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: color 0.2s;
+}
+.back-link:hover { color: var(--text-primary); }
+
+.ebooks-header {
+    text-align: center;
+    padding: 3rem 20px 2rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* Search Box */
+.search-box {
+    display: flex;
+    margin: 2rem auto;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 50px;
+    padding: 5px;
+    max-width: 500px;
+    transition: border-color 0.3s;
+}
+.search-box:focus-within { border-color: var(--accent); }
+.search-box input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    padding: 12px 20px;
+    font-size: 1rem;
+    outline: none;
+}
+.search-box button {
+    background: var(--accent);
+    color: black;
+    border: none;
+    border-radius: 50px;
+    padding: 10px 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.2s;
+}
+.search-box button:hover { opacity: 0.8; }
+
+/* Category Chips */
+.category-chips {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 1.5rem;
+}
+.chip {
+    background: var(--bg-card);
+    color: var(--text-muted);
+    border: 1px solid var(--border-color);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.chip:hover, .chip.active {
+    background: var(--text-primary);
+    color: var(--bg-main);
+    border-color: var(--text-primary);
+}
+
+/* Books Grid */
+.ebooks-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 2rem;
+    padding-bottom: 4rem;
+}
+.book-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.3s;
+}
+.book-card:hover { transform: translateY(-5px); }
+.book-cover {
+    width: 100%;
+    height: 280px;
+    object-fit: cover;
+    background: #27272a;
+}
+.book-info { padding: 15px; }
+.book-info h3 { font-size: 1.1rem; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.book-info p { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px; }
+.read-btn {
+    width: 100%;
+    background: #27272a;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.read-btn:hover { background: var(--accent); color: black; }
+
+/* Loading Spinner */
+.loading-state { text-align: center; padding: 3rem; color: var(--text-muted); }
+.spinner {
+    width: 40px; height: 40px;
+    border: 3px solid var(--border-color);
+    border-top: 3px solid var(--accent);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 15px;
+}
+@keyframes spin { 100% { transform: rotate(360deg); } }
+
+/* Reader Overlay (Popup) */
+.reader-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: var(--bg-main);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    transform: translateY(100%);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.reader-overlay.active { transform: translateY(0); }
+.reader-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 25px;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-card);
+}
+.reader-actions { display: flex; gap: 10px; }
+.reader-btn {
+    padding: 8px 15px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+}
+.download-btn { background: var(--text-primary); color: var(--bg-main); }
+.close-btn { background: #ef4444; color: white; }
+.reader-content { flex: 1; width: 100%; height: 100%; }
+.reader-content iframe { width: 100%; height: 100%; border: none; background: white;}
