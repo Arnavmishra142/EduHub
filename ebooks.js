@@ -49,17 +49,22 @@ closeReaderBtn.addEventListener('click', () => {
     document.body.style.overflow = ''; 
 });
 
-// ==================== FIX: INSTANT DIRECT DOWNLOAD ====================
+// ==================== INSTANT DIRECT DOWNLOAD ====================
 downloadBtn.addEventListener('click', () => {
     if(currentDownloadUrl) {
+        const originalText = downloadBtn.innerHTML;
+        downloadBtn.innerHTML = `⏳ Starting Download...`;
+        
         // Native Browser Download Trigger (Instant & Direct)
         const a = document.createElement('a');
         a.href = currentDownloadUrl;
-        a.target = '_blank'; // Opens directly
+        a.target = '_blank'; // Opens directly without waiting
         a.download = `${currentBookTitle}_EduHub`; 
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
+
+        setTimeout(() => { downloadBtn.innerHTML = originalText; }, 2000);
     } else {
         alert("Sorry, direct download file is not available for this book.");
     }
@@ -149,23 +154,32 @@ async function openPremiumReader(title, readUrl, dlUrl, isPdf) {
     readerOverlay.classList.add('active');
     document.body.style.overflow = 'hidden'; 
     
-    readerContent.innerHTML = `<div class="loading-state" style="height:100%; display:flex; flex-direction:column; justify-content:center;"><div class="spinner"></div><p>Loading External Reader...</p></div>`;
+    // Centered Loading State
+    readerContent.innerHTML = `<div class="loading-state" style="height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+        <div class="spinner"></div>
+        <p style="margin-top:15px; color:#a0a0a0;">Loading Premium Reader...</p>
+    </div>`;
 
     try {
         if (isPdf) {
             // ==================== EXTERNAL PDF READER ====================
-            // Uses Google Docs PDF Viewer as an external seamless reader embed
             const externalPdfViewer = `https://docs.google.com/viewer?url=${encodeURIComponent(readUrl)}&embedded=true`;
             readerContent.innerHTML = `<iframe src="${externalPdfViewer}" style="width:100%; height:100%; border:none; background-color:#09090b;"></iframe>`;
         } else {
             // ==================== DARK MODE HTML READER ====================
-            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(readUrl)}`;
+            // Using RAW proxy instead of JSON wrapper to prevent parsing errors on large books
+            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(readUrl)}`;
             const response = await fetch(proxyUrl);
-            const data = await response.json();
-            let bookHtml = data.contents;
+            
+            if (!response.ok) throw new Error("Proxy fetch failed");
+            
+            let bookHtml = await response.text();
+            
+            if (!bookHtml) throw new Error("Empty content received");
 
             const baseUrl = readUrl.substring(0, readUrl.lastIndexOf('/') + 1);
 
+            // Our Custom Dark Theme Injection
             const premiumStyling = `
                 <base href="${baseUrl}">
                 <style>
@@ -186,7 +200,7 @@ async function openPremiumReader(title, readUrl, dlUrl, isPdf) {
                     p { margin-bottom: 1.5rem !important; text-align: justify !important; }
                     a { color: #c9a050 !important; text-decoration: none !important; }
                     img { max-width: 100% !important; height: auto !important; border-radius: 8px !important; display: block; margin: 2rem auto !important; }
-                    pre { background: #18181b !important; padding: 1rem !important; border-radius: 8px !important; font-family: monospace !important; font-size: 0.9rem !important; white-space: pre-wrap !important; }
+                    pre { background: #18181b !important; padding: 1rem !important; border-radius: 8px !important; font-family: monospace !important; font-size: 0.9rem !important; white-space: pre-wrap !important; overflow-x: auto !important;}
                 </style>
             `;
 
@@ -196,18 +210,27 @@ async function openPremiumReader(title, readUrl, dlUrl, isPdf) {
                 bookHtml = premiumStyling + bookHtml; 
             }
 
+            // Inject iframe
             readerContent.innerHTML = `<iframe id="premiumFrame" style="width:100%; height:100%; border:none; background-color:#09090b;"></iframe>`;
             
-            const frameDoc = document.getElementById('premiumFrame').contentWindow.document;
-            frameDoc.open();
-            frameDoc.write(bookHtml);
-            frameDoc.close();
+            // Timeout allows the DOM to render the iframe before writing inside it
+            setTimeout(() => {
+                const frame = document.getElementById('premiumFrame');
+                if (frame) {
+                    const frameDoc = frame.contentWindow.document;
+                    frameDoc.open();
+                    frameDoc.write(bookHtml);
+                    frameDoc.close();
+                }
+            }, 100);
         }
     } catch (error) {
         console.error("Reader Error:", error);
-        readerContent.innerHTML = `<div style="text-align:center; padding:3rem; color:#ef4444;">
-            <h3>⚠️ Could not load the reader</h3>
-            <p style="color:#a1a1aa; margin-top:10px;">Try downloading the book instead.</p>
+        // Error screen with a working fallback link
+        readerContent.innerHTML = `<div style="text-align:center; padding:3rem; color:#ef4444; display:flex; flex-direction:column; justify-content:center; align-items:center; height:100%;">
+            <h3 style="margin-bottom:10px;">⚠️ Could not load the dark reader</h3>
+            <p style="color:#a1a1aa; max-width: 400px; line-height:1.5;">The book file is either too large or the server blocked our custom dark mode request.</p>
+            <a href="${readUrl}" target="_blank" style="margin-top:25px; display:inline-block; background:#ffffff; color:#000000; padding:12px 24px; border-radius:8px; text-decoration:none; font-weight:600; transition: 0.2s;">📖 Read Original Version</a>
         </div>`;
     }
 }
