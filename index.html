@@ -1,62 +1,75 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Ebooks</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
+<!DOCTYPE html>  <html lang="en">  
+<head>  
+    <meta charset="UTF-8">  
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+    <title>EduHub | Premium Learning</title>  
+    <link rel="preconnect" href="https://fonts.googleapis.com">  
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>  
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">  
+    <link rel="stylesheet" href="style.css">  
+</head>  
+<body>  <nav class="navbar">  
+    <div class="logo">Edu<span>Hub.</span></div>  
+    <div class="nav-links">  
+        <a href="#" class="active">Home</a>  
+        <a href="#">About</a>  
+    </div>  
+</nav>  
 
-    <nav class="navbar">
-        <div class="logo">Edu<span>Hub.</span></div>
-    </nav>
+<header class="hero">  
+    <h1 class="hero-title">Master Your Curriculum.</h1>  
+    <p class="hero-subtitle">Access premium E-books, NCERTs, detailed solutions, and past papers all in one distraction-free space.</p>  
+</header>  
 
-    <section class="filters">
+<main class="container">  
+    <div class="category-grid">  
+          
+       <a href="ebooks.html" style="text-decoration: none; color: inherit;">  
+<div class="category-card" data-target="all-books">  
+    <div class="card-icon">  
+       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path></svg>  
+    </div>  
+    <h3>All E-Books</h3>  
+    <p>Explore our complete library of educational and reference books.</p>  
+</div>  
+       </a>  
+          
 
-        <button class="chip" data-topic="all">All</button>
+        <div class="category-card" data-target="ncert-books">  
+            <div class="card-icon">  
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"></path><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"></path><path d="M2 7h20"></path></svg>  
+            </div>  
+            <h3>NCERT Books</h3>  
+            <p>Official NCERT textbooks for all classes, ready to read or download.</p>  
+        </div>  
 
-        <button class="chip" data-topic="fiction">Fiction</button>
+        <div class="category-card" data-target="ncert-solutions">  
+            <div class="card-icon">  
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path><path d="m9 15 2 2 4-4"></path></svg>  
+            </div>  
+            <h3>NCERT Solutions</h3>  
+            <p>Step-by-step verified solutions for all chapter exercises.</p>  
+        </div>  
 
-        <button class="chip" data-topic="non-fiction">Non-Fiction</button>
+        <div class="category-card" data-target="pyq-papers">  
+            <div class="card-icon">  
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>  
+            </div>  
+            <h3>Previous Year Papers</h3>  
+            <p>Real exam papers (PYQs) to test your preparation level.</p>  
+        </div>  
 
-        <button class="chip" data-topic="science">Science</button>
+    </div>  
+</main>  
 
-        <button class="chip" data-topic="history">History</button>
+<script src="script.js"></script>
 
-    </section>
+</body>  
+</html>  Bro sun
 
-    <section class="books">
-        <div class="book-card" data-topic="fiction">
-            <h3>Sample Fiction Book</h3>
-        </div>
+Pehle ye aisa tha: <button class="chip active" data-topic="fiction">
+Isko aise kar de:
 
-        <div class="book-card" data-topic="science">
-            <h3>Physics Handbook</h3>
-        </div>
-    </section>
+<button class="chip" data-topic="fiction">Fiction</button>
 
-    <script>
-        const chips = document.querySelectorAll('.chip');
-        const books = document.querySelectorAll('.book-card');
-
-        chips.forEach(chip => {
-            chip.addEventListener('click', () => {
-
-                chips.forEach(c => c.classList.remove('active'));
-                chip.classList.add('active');
-
-                const topic = chip.dataset.topic;
-
-                books.forEach(book => {
-                    if (topic === "all" || book.dataset.topic === topic) {
-                        book.style.display = "block";
-                    } else {
-                        book.style.display = "none";
-                    }
-                });
-            });
-        });
-    </script>
-
-</body>
-</html>
+    
