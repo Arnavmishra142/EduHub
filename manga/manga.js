@@ -1,11 +1,11 @@
-// ==================== MANGADEX PROXIED ENGINE ====================
+// ==================== ULTIMATE MANGADEX ENGINE ====================
 
 const mangaSearchInput = document.getElementById('mangaSearchInput');
 const mangaSearchBtn = document.getElementById('mangaSearchBtn');
 const mangaGrid = document.getElementById('mangaGrid');
 const mangaLoader = document.getElementById('mangaLoader');
 
-// 1. Initial Load (Trending Manga)
+// 1. Initial Load
 document.addEventListener('DOMContentLoaded', () => {
     fetchManga('Solo Leveling'); 
 });
@@ -23,38 +23,43 @@ mangaSearchInput.addEventListener('keypress', (e) => {
     }
 });
 
-// 3. Core Fetch Function with Proxy Hack
+// 3. Robust Fetch Function (Bypasses Indian ISP Blocks)
 async function fetchManga(query) {
     mangaGrid.innerHTML = '';
     mangaLoader.style.display = 'block';
 
-    // MangaDex API Search URL
+    // Original API URL
     const apiUrl = `https://api.mangadex.org/manga?title=${encodeURIComponent(query)}&limit=20&includes[]=cover_art&contentRating[]=safe`;
     
-    // Proxy to bypass CORS error (The Magic Ingredient)
-    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(apiUrl)}`;
+    // 🔥 Advanced Proxy to bypass Cloudflare & ISP Blocks
+    const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(apiUrl)}`;
 
     try {
-        const response = await fetch(proxyUrl);
-        if (!response.ok) throw new Error("Proxy failed");
+        // 15 Seconds strict timeout so the spinner doesn't load infinitely
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+        const response = await fetch(proxyUrl, { signal: controller.signal });
+        clearTimeout(timeoutId);
+
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         
-        const rawData = await response.json();
-        const data = JSON.parse(rawData.contents); 
+        const data = await response.json();
         
         mangaLoader.style.display = 'none';
 
         if (!data.data || data.data.length === 0) {
-            mangaGrid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: #a1a1aa;">No Manga found. Try "Naruto" or "One Piece".</p>`;
+            mangaGrid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: #a1a1aa;">No Manga found. Try "Naruto" or "Jujutsu Kaisen".</p>`;
             return;
         }
 
         renderManga(data.data);
     } catch (error) {
-        console.error("MangaDex Error:", error);
+        console.error("Manga Fetch Error:", error);
         mangaLoader.style.display = 'none';
         mangaGrid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #e11d48; padding: 2rem;">
-            <h3>🏮 Connection to Manga Realm Failed</h3>
-            <p style="color: #a1a1aa; font-size: 0.9rem; margin-top: 10px;">The API might be down or blocked. Try refreshing after 1 minute.</p>
+            <h3>🏮 Network Blocked or Slow</h3>
+            <p style="color: #a1a1aa; font-size: 0.9rem; margin-top: 10px;">Your ISP might be blocking the anime servers, or the connection timed out. Try again or use a VPN.</p>
         </div>`;
     }
 }
@@ -68,12 +73,18 @@ function renderManga(mangaList) {
         const attributes = manga.attributes;
         const title = attributes.title.en || attributes.title.ja || Object.values(attributes.title)[0] || "Unknown Title";
         
-        // Find Cover Art filename from relationships
+        // Find Cover Art filename
         const coverRel = manga.relationships.find(rel => rel.type === 'cover_art');
         const coverFileName = coverRel && coverRel.attributes ? coverRel.attributes.fileName : null;
         
-        const coverUrl = coverFileName 
+        // Original Image URL
+        const mdImageUrl = coverFileName 
             ? `https://uploads.mangadex.org/covers/${id}/${coverFileName}.256.jpg`
+            : null;
+
+        // 🔥 Image Proxy (wsrv.nl) - Taaki photos load hone mein dikkat na aaye!
+        const coverUrl = mdImageUrl 
+            ? `https://wsrv.nl/?url=${encodeURIComponent(mdImageUrl)}`
             : "https://via.placeholder.com/200x300?text=No+Cover";
 
         const card = document.createElement('div');
@@ -86,7 +97,7 @@ function renderManga(mangaList) {
                 </div>
             </div>
             <div class="manga-info">
-                <h3>${title}</h3>
+                <h3 title="${title}">${title}</h3>
             </div>
         `;
         mangaGrid.appendChild(card);
