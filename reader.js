@@ -1,10 +1,11 @@
 // ==================== MASTER READER ENGINE ====================
 
-// 1. URL Se Data Nikalna (Routing)
+// 1. Get Variables from URL (Safe Decoding)
 const urlParams = new URLSearchParams(window.location.search);
-const fileUrl = urlParams.get('url');
-const fileType = urlParams.get('type') || 'pdf'; // Default 'pdf'
-const bookTitle = urlParams.get('title') || 'EduHub Premium Reader';
+const fileUrl = urlParams.get('url') ? decodeURIComponent(urlParams.get('url')) : '';
+const dlUrl = urlParams.get('dl') ? decodeURIComponent(urlParams.get('dl')) : ''; 
+const fileType = urlParams.get('type') || 'pdf'; 
+const bookTitle = urlParams.get('title') ? decodeURIComponent(urlParams.get('title')) : 'EduHub Reader';
 
 // 2. DOM Elements
 const rTitle = document.getElementById('rTitle');
@@ -20,85 +21,117 @@ const rDownloadBtn = document.getElementById('rDownloadBtn');
 
 // ==================== INITIALIZATION ====================
 document.addEventListener('DOMContentLoaded', () => {
-    // Title Set Karo
-    rTitle.innerText = decodeURIComponent(bookTitle);
+    rTitle.innerText = bookTitle;
 
-    // Agar URL nahi mila toh error dikhao
     if (!fileUrl) {
-        loaderText.innerHTML = `<span style="color:#ef4444;">⚠️ Error: No file link provided!</span>`;
-        document.querySelector('.spinner').style.display = 'none';
+        rLoader.innerHTML = `<span style="color:#ef4444;">⚠️ Error: Document link missing!</span>`;
         return;
     }
 
-    // Engine Switcher
     if (fileType === 'pdf') {
-        initPdfEngine(decodeURIComponent(fileUrl));
+        initPdfEngine(fileUrl);
+    } else if (fileType === 'html') {
+        initHtmlEngine(fileUrl); 
     } else if (fileType === 'manga') {
-        initMangaEngine(decodeURIComponent(fileUrl));
+        initMangaEngine(fileUrl);
     }
 });
 
 // ==================== PDF ENGINE ====================
 function initPdfEngine(url) {
-    // Hide Manga controls
     modeBtn.style.display = 'none';
-    
-    // Inject Fast PDF Viewer (Google Docs Engine for now, handles large PDFs smoothly)
     const viewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true`;
     
-    // Thoda wait karke loader hatayenge taaki iframe load ho jaye
     setTimeout(() => {
         rLoader.style.display = 'none';
         pdfWrapper.style.display = 'block';
-        pdfWrapper.innerHTML = `<iframe src="${viewerUrl}" frameborder="0" allowfullscreen></iframe>`;
+        pdfWrapper.innerHTML = `<iframe src="${viewerUrl}" style="width:100%; height:100%; border:none; background-color:#000000;"></iframe>`;
     }, 1000);
 }
 
-// ==================== MANGA ENGINE (Demo Structure) ====================
-function initMangaEngine(apiUrl) {
-    modeBtn.style.display = 'flex'; // Manga mode change karne ka button dikhao
+// ==================== HTML ENGINE ====================
+async function initHtmlEngine(readUrl) {
+    modeBtn.style.display = 'none';
+    pdfWrapper.style.display = 'block'; 
     
-    // Jab hum scraper banayenge, toh apiUrl se images yahan aayengi.
-    // Abhi test karne ke liye main dummy images daal raha hoon:
-    const mockMangaImages = [
-        "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800&h=1200&fit=crop",
-        "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800&h=1200&fit=crop"
-    ];
+    try {
+        // Safe 12-second limit
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 12000);
 
-    setTimeout(() => {
-        rLoader.style.display = 'none';
-        mangaWrapper.style.display = 'flex';
+        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(readUrl)}`;
+        const response = await fetch(proxyUrl, { signal: controller.signal });
         
-        mockMangaImages.forEach((imgSrc, index) => {
-            const img = document.createElement('img');
-            img.src = imgSrc;
-            img.className = 'manga-page';
-            img.loading = 'lazy'; // Lazy loading for performance
-            img.alt = `Page ${index + 1}`;
-            mangaWrapper.appendChild(img);
-        });
-    }, 1500);
+        clearTimeout(timeoutId);
+
+        if (!response.ok) throw new Error("Proxy fetch failed");
+        
+        let bookHtml = await response.text();
+        if (!bookHtml || bookHtml.length < 100) throw new Error("Empty content");
+
+        const baseUrl = readUrl.substring(0, readUrl.lastIndexOf('/') + 1);
+
+        const premiumStyling = `
+            <base href="${baseUrl}">
+            <style>
+                @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500&display=swap');
+                body { background-color: #000000 !important; color: #e4e4e7 !important; font-family: 'Playfair Display', Georgia, serif !important; line-height: 1.8 !important; padding: 60px 8% 3rem !important; max-width: 800px !important; margin: 0 auto !important; font-size: 1.15rem !important; }
+                h1, h2, h3, h4, h5 { color: #ffffff !important; font-family: 'Inter', sans-serif !important; text-align: center !important; margin-top: 3rem !important; font-weight: 600 !important; }
+                p { margin-bottom: 1.5rem !important; text-align: justify !important; }
+                a { color: #c9a050 !important; text-decoration: none !important; }
+                img { max-width: 100% !important; height: auto !important; border-radius: 8px !important; display: block; margin: 2rem auto !important; }
+            </style>
+        `;
+
+        if (bookHtml.includes('</head>')) {
+            bookHtml = bookHtml.replace('</head>', premiumStyling + '</head>');
+        } else {
+            bookHtml = premiumStyling + bookHtml; 
+        }
+
+        rLoader.style.display = 'none'; 
+        pdfWrapper.innerHTML = `<iframe id="premiumFrame" style="width:100%; height:100%; border:none; background-color:#000000;"></iframe>`;
+        
+        setTimeout(() => {
+            const frame = document.getElementById('premiumFrame');
+            if (frame) {
+                const frameDoc = frame.contentWindow.document;
+                frameDoc.open();
+                frameDoc.write(bookHtml);
+                frameDoc.close();
+            }
+        }, 150);
+
+    } catch (error) {
+        console.error("Reader Error:", error);
+        // Agar book fail hui, toh Error screen with direct Original Link aayega
+        rLoader.innerHTML = `<div style="text-align:center; padding:2rem; color:#ef4444;">
+            <h3 style="margin-bottom:10px;">⚠️ Heavy Book File</h3>
+            <p style="color:#a1a1aa; font-size: 0.95rem; max-width: 300px; margin: 0 auto 20px;">This book is too large for the dark mode engine. Please read the original version.</p>
+            <a href="${readUrl}" target="_blank" style="background:#ffffff; color:#000000; padding:10px 20px; border-radius:8px; text-decoration:none; font-weight:600;">📖 Read Original</a>
+        </div>`;
+    }
 }
 
-// ==================== UI CONTROLS & ANIMATIONS ====================
+// ==================== MANGA ENGINE ====================
+function initMangaEngine(apiUrl) {
+    modeBtn.style.display = 'flex'; 
+    rLoader.innerHTML = `<span style="color:#a1a1aa;">Manga Module Coming Soon...</span>`;
+}
 
-// 1. Auto-Hide Topbar on Scroll
+// ==================== UI CONTROLS ====================
 let lastScrollTop = 0;
 readerContainer.addEventListener('scroll', () => {
     let currentScroll = readerContainer.scrollTop;
-    
-    // Agar 60px se zyada niche gaye aur scroll down kar rahe hain
     if (currentScroll > lastScrollTop && currentScroll > 60) {
-        readerTopbar.classList.add('hidden'); // Chup jao
+        readerTopbar.classList.add('hidden');
     } else {
-        readerTopbar.classList.remove('hidden'); // Wapas aao
+        readerTopbar.classList.remove('hidden');
     }
     lastScrollTop = currentScroll;
 });
 
-// 2. Go Back Button
 backBtn.addEventListener('click', () => {
-    // Agar pichla page hai toh wapas jao, warna homepage pe jao
     if (window.history.length > 1) {
         window.history.back();
     } else {
@@ -106,26 +139,23 @@ backBtn.addEventListener('click', () => {
     }
 });
 
-// 3. Download Button Logic
+// ==================== FAIL-SAFE DOWNLOAD LOGIC ====================
 rDownloadBtn.addEventListener('click', () => {
-    if (!fileUrl) return;
-    
-    const originalText = rDownloadBtn.innerHTML;
-    rDownloadBtn.innerHTML = `<span>⏳ Saving...</span>`;
-    
-    if (fileType === 'pdf') {
-        // Direct Download for PDF
-        const a = document.createElement('a');
-        a.href = decodeURIComponent(fileUrl);
-        a.target = '_blank';
-        a.download = `${decodeURIComponent(bookTitle)}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-    } else {
-        // Manga Download Logic (Future ZIP Builder)
+    if (fileType === 'manga') {
         alert("Manga ZIP download will be ready soon!");
+        return;
     }
+
+    if (!dlUrl || dlUrl === 'undefined' || dlUrl === '') {
+        alert("Download file is not available for this specific book.");
+        return;
+    }
+
+    const originalText = rDownloadBtn.innerHTML;
+    rDownloadBtn.innerHTML = `<span>⏳ Opening...</span>`;
+    
+    // Cross-origin safe download method
+    window.open(dlUrl, '_blank');
     
     setTimeout(() => { rDownloadBtn.innerHTML = originalText; }, 2000);
 });
