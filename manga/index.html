@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manga Zone 🎌 | EduHub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="manga.css">
+</head>
+<body>
+
+    <nav class="manga-nav">
+        <a href="../index.html" class="back-link">← Back to EduHub</a>
+        <div class="logo manga-logo">Manga<span>Zone 🎌</span></div>
+    </nav>
+
+    <header class="manga-hero">
+        <h1 class="glow-title">Dive into the Manga World</h1>
+        <p>Read thousands of manga, manhwa, and webtoons ad-free.</p>
+        
+        <div class="manga-search">
+            <input type="text" id="mangaSearchInput" placeholder="Search Solo Leveling, Naruto, Berserk...">
+            <button id="mangaSearchBtn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+            </button>
+        </div>
+    </header>
+
+    <main class="manga-container">
+        <div id="mangaLoader" class="manga-loader" style="display: none;">
+            <div class="manga-spinner"></div>
+            <p>Summoning Chapters...</p>
+        </div>
+
+        <div class="manga-grid" id="mangaGrid">
+            <div class="manga-card" style="border: 1px dashed #555; text-align: center; padding: 2rem;">
+                <p style="color: #a1a1aa;">Manga Cards Will Appear Here</p>
+            </div>
+        </div>
+    </main>
+
+    <script src="manga.js"></script>
+</body>
+</html>
