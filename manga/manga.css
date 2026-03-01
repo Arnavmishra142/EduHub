@@ -1,0 +1,71 @@
+/* ==================== MANGA ZONE STYLING ==================== */
+:root {
+    --bg-manga: #050505; /* Deep black for manga mode */
+    --card-manga: #121214;
+    --manga-accent: #e11d48; /* Crimson Red glow */
+    --manga-text: #f4f4f5;
+    --manga-muted: #a1a1aa;
+    --font-manga: 'Inter', sans-serif;
+    --font-heading: 'Space Grotesk', sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    background-color: var(--bg-manga);
+    color: var(--manga-text);
+    font-family: var(--font-manga);
+    background-image: radial-gradient(circle at 50% 0%, #200812 0%, transparent 50%);
+    min-height: 100vh;
+}
+
+/* Navbar */
+.manga-nav {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1.5rem 5%; border-bottom: 1px solid #1f1f22;
+    background: rgba(5, 5, 5, 0.8); backdrop-filter: blur(10px);
+}
+.back-link { color: var(--manga-muted); text-decoration: none; font-size: 0.95rem; transition: color 0.2s; }
+.back-link:hover { color: var(--manga-accent); }
+.manga-logo { font-family: var(--font-heading); font-size: 1.5rem; font-weight: 700; }
+.manga-logo span { color: var(--manga-accent); text-shadow: 0 0 10px rgba(225, 29, 72, 0.4); }
+
+/* Hero */
+.manga-hero { text-align: center; padding: 4rem 20px 2rem; }
+.glow-title { 
+    font-family: var(--font-heading); font-size: 3rem; margin-bottom: 10px;
+    background: linear-gradient(to right, #fff, var(--manga-accent));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.manga-hero p { color: var(--manga-muted); font-size: 1.1rem; }
+
+/* Search Box */
+.manga-search {
+    display: flex; margin: 2rem auto; background: var(--card-manga);
+    border: 1px solid #27272a; border-radius: 12px; padding: 5px;
+    max-width: 500px; transition: all 0.3s;
+}
+.manga-search:focus-within { border-color: var(--manga-accent); box-shadow: 0 0 15px rgba(225, 29, 72, 0.2); }
+.manga-search input {
+    flex: 1; background: transparent; border: none; color: #fff;
+    padding: 15px 20px; font-size: 1rem; outline: none;
+}
+.manga-search button {
+    background: var(--manga-accent); color: white; border: none;
+    border-radius: 8px; padding: 0 20px; cursor: pointer; transition: 0.2s;
+}
+.manga-search button:hover { background: #be123c; }
+
+/* Grid Area */
+.manga-container { max-width: 1000px; margin: 0 auto; padding: 2rem 20px 5rem; }
+.manga-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1.5rem;
+}
+
+/* Loader */
+.manga-loader { text-align: center; padding: 3rem; color: var(--manga-muted); }
+.manga-spinner {
+    width: 40px; height: 40px; border: 3px solid #27272a; border-top: 3px solid var(--manga-accent);
+    border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 15px;
+}
+@keyframes spin { 100% { transform: rotate(360deg); } }
