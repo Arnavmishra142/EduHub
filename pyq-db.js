@@ -16,15 +16,23 @@ const pyqData = {
             "History": { "2024": [{ title: "History Set-1", link: "#" }] },
             "Home Science": { "2024": [{ title: "Home Science Set-1", link: "#" }] },
             "Mathematics": { 
+                "2025": [{ title: "Maths Standard Set-1", link: "#" }],
                 "2024": [
                     { title: "Maths Standard Set-1", link: "https://drive.google.com/uc?export=download&id=YOUR_FILE_ID_HERE" },
                     { title: "Marking Scheme (Solutions)", link: "#" }
                 ],
-                "2023": [{ title: "Maths Standard Set-1", link: "#" }]
+                "2023": [{ title: "Maths Standard Set-1", link: "#" }],
+                "2022": [{ title: "Maths Standard Set-1", link: "#" }],
+                "2021": [{ title: "Maths Standard Set-1", link: "#" }],
+                "2020": [{ title: "Maths Standard Set-1", link: "#" }]
             },
             "Physics": { 
+                "2025": [{ title: "Physics Set-1", link: "#" }],
                 "2024": [{ title: "Physics Set-1", link: "#" }],
-                "2023": [{ title: "Physics Set-1", link: "#" }]
+                "2023": [{ title: "Physics Set-1", link: "#" }],
+                "2022": [{ title: "Physics Set-1", link: "#" }],
+                "2021": [{ title: "Physics Set-1", link: "#" }],
+                "2020": [{ title: "Physics Set-1", link: "#" }]
             },
             "Political Science": { "2024": [{ title: "Political Science Set-1", link: "#" }] },
             "Sanskrit": { "2024": [{ title: "Sanskrit Set-1", link: "#" }] }
@@ -36,14 +44,26 @@ const pyqData = {
             "Hindi": { "2024": [{ title: "Hindi Course A Set-1", link: "#" }] },
             "History": { "2024": [{ title: "History Set-1", link: "#" }] },
             "Mathematics": { 
+                "2025": [{ title: "Maths Standard Set-1", link: "#" }],
                 "2024": [
                     { title: "Maths Standard Set-1", link: "#" },
                     { title: "Maths Basic Set-1", link: "#" }
-                ]
+                ],
+                "2023": [{ title: "Maths Standard Set-1", link: "#" }],
+                "2022": [{ title: "Maths Standard Set-1", link: "#" }],
+                "2021": [{ title: "Maths Standard Set-1", link: "#" }],
+                "2020": [{ title: "Maths Standard Set-1", link: "#" }]
             },
             "Political Science": { "2024": [{ title: "Political Science Set-1", link: "#" }] },
             "Sanskrit": { "2024": [{ title: "Sanskrit Set-1", link: "#" }] },
-            "Science": { "2024": [{ title: "Science Set-1", link: "#" }] },
+            "Science": { 
+                "2025": [{ title: "Science Set-1", link: "#" }],
+                "2024": [{ title: "Science Set-1", link: "#" }],
+                "2023": [{ title: "Science Set-1", link: "#" }],
+                "2022": [{ title: "Science Set-1", link: "#" }],
+                "2021": [{ title: "Science Set-1", link: "#" }],
+                "2020": [{ title: "Science Set-1", link: "#" }]
+            },
             "Social Science": { "2024": [{ title: "SST Set-1", link: "#" }] }
         }
     }
