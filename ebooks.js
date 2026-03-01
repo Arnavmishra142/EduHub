@@ -7,6 +7,7 @@ const loadingIndicator = document.getElementById('loadingIndicator');
 
 // ==================== INITIALIZATION ====================
 document.addEventListener('DOMContentLoaded', () => {
+    // Page load default category
     fetchBooks('fiction', 'topic'); 
 });
 
@@ -43,9 +44,9 @@ async function fetchBooks(query, type) {
 
     try {
         const response = await fetch(apiUrl);
-        if (!response.ok) throw new Error("API Rate Limit Hit");
-        const data = await response.json();
+        if (!response.ok) throw new Error("API Limit");
         
+        const data = await response.json();
         loadingIndicator.style.display = 'none';
 
         if (!data.results || data.results.length === 0) {
@@ -56,7 +57,7 @@ async function fetchBooks(query, type) {
         renderBooks(data.results);
     } catch (error) {
         loadingIndicator.style.display = 'none';
-        ebooksGrid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #ef4444; padding: 3rem;">⚠️ Failed to fetch books. Check your internet or wait 1 minute.</div>`;
+        ebooksGrid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #ef4444; padding: 3rem;">⚠️ Failed to fetch books. Project Gutenberg API might be rate-limiting you. Please wait 1 minute.</div>`;
     }
 }
 
@@ -64,19 +65,20 @@ async function fetchBooks(query, type) {
 function renderBooks(books) {
     ebooksGrid.innerHTML = ''; 
 
-    books.slice(0, 20).forEach(book => { 
+    books.slice(0, 24).forEach(book => { 
         const title = book.title || "Unknown Title";
         const author = book.authors && book.authors.length > 0 ? book.authors[0].name : "Unknown Author";
         const coverImg = book.formats['image/jpeg'] || "https://images.unsplash.com/photo-1455390582262-044cdead27d8?w=800&q=80";
         
-        // Formats Extract
+        // Exact Links Extract
         const pdfLink = book.formats['application/pdf'];
         const htmlLink = book.formats['text/html'] || book.formats['text/html; charset=utf-8'];
         const epubLink = book.formats['application/epub+zip'];
+        const textLink = book.formats['text/plain; charset=utf-8'] || book.formats['text/plain; charset=us-ascii'];
         
-        // Logic: Kya padhna hai aur kya download karna hai
-        const readLink = pdfLink || htmlLink || epubLink;
-        const downloadLink = epubLink || pdfLink || htmlLink; // Best format for download
+        // Final Decide - Kya padhna hai aur kya download karna hai
+        const readLink = pdfLink || htmlLink || textLink;
+        const downloadLink = epubLink || pdfLink || htmlLink; 
 
         const card = document.createElement('div');
         card.className = 'book-card';
@@ -92,7 +94,6 @@ function renderBooks(books) {
         card.querySelector('.read-btn').addEventListener('click', () => {
             if (readLink) {
                 const isPdf = !!pdfLink;
-                // Naya Function: Ab hum dlUrl (Download link) bhi bhej rahe hain!
                 redirectToMasterReader(title, readLink, downloadLink, isPdf);
             } else {
                 alert("Sorry, reading format is not available.");
@@ -103,14 +104,14 @@ function renderBooks(books) {
     });
 }
 
-// ==================== REDIRECT ====================
+// ==================== REDIRECT TO MASTER READER ====================
 function redirectToMasterReader(title, readUrl, dlUrl, isPdf) {
     const safeTitle = encodeURIComponent(title);
     const safeUrl = encodeURIComponent(readUrl);
-    const safeDl = encodeURIComponent(dlUrl); // Safe Download Link
+    const safeDl = dlUrl ? encodeURIComponent(dlUrl) : ''; 
     const type = isPdf ? 'pdf' : 'html'; 
     
-    // URL me dl (download) parameter add kiya hai
+    // Yahan hum url me clear variables bhej rahe hain
     window.location.href = `reader.html?type=${type}&title=${safeTitle}&url=${safeUrl}&dl=${safeDl}`;
 }
 
