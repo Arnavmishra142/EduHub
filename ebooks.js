@@ -118,3 +118,47 @@ function redirectToMasterReader(title, readUrl, dlUrl, isPdf) {
 function removeChipSelection() {
     categoryChips.forEach(c => c.classList.remove('active'));
 }
+// ==================== WHATSAPP REQUEST FEATURE ====================
+document.addEventListener('DOMContentLoaded', () => {
+    const requestModal = document.getElementById('requestModal');
+    const openReqBtn = document.getElementById('openRequestBtn');
+    const closeReqBtn = document.getElementById('closeRequestBtn');
+    const sendReqBtn = document.getElementById('sendRequestBtn');
+    const reqName = document.getElementById('reqName');
+    const reqBook = document.getElementById('reqBook');
+
+    // Tera WhatsApp Number (with country code 91)
+    const adminWhatsAppNumber = "916393349498"; 
+
+    // Open & Close Modal
+    openReqBtn.addEventListener('click', () => requestModal.classList.add('active'));
+    closeReqBtn.addEventListener('click', () => requestModal.classList.remove('active'));
+
+    // Send Request Logic
+    sendReqBtn.addEventListener('click', () => {
+        const name = reqName.value.trim();
+        const book = reqBook.value.trim();
+        
+        if (!name || !book) {
+            alert("Please enter both your Name and the Book Name! 😅");
+            return;
+        }
+        
+        // 48 Hours alert
+        alert(`Awesome ${name}! 🎉\nYour request is being sent. We will add the book within 48 Hours!`);
+        
+        // WhatsApp Message Format
+        const message = `Hello EduHub! 👋\n\nMera naam *${name}* hai.\nMujhe library me ye book chahiye thi:\n\n📚 *${book}*\n\nPlease isko 48 hours me add kar dijiye!`;
+        
+        // WhatsApp API URL builder
+        const waUrl = `https://wa.me/${adminWhatsAppNumber}?text=${encodeURIComponent(message)}`;
+        
+        // Clear Inputs & Close Modal
+        reqName.value = '';
+        reqBook.value = '';
+        requestModal.classList.remove('active');
+        
+        // Open WhatsApp in new tab/app
+        window.open(waUrl, '_blank');
+    });
+});
