@@ -4,9 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Global E-Library | EduHub</title>
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -21,14 +23,17 @@
         <p class="hero-subtitle">Search thousands of classics, novels, and reference books.</p>
         
         <div class="search-box">
-            <input type="text" id="ebookSearch" placeholder="Search books, authors, or topics...">
+            <input type="text" id="ebookSearch" placeholder="Search books, authors, or topics..." autocomplete="off">
             <button id="searchBtn">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.3-4.3"></path>
+                </svg>
             </button>
         </div>
 
         <div class="category-chips" id="categoryChips">
-            <button class="chip active" data-topic="fiction">Fiction</button>
+            <button class="chip" data-topic="fiction">Fiction</button>
             <button class="chip" data-topic="philosophy">Philosophy</button>
             <button class="chip" data-topic="science">Science</button>
             <button class="chip" data-topic="politics">Politics</button>
@@ -49,7 +54,7 @@
         <div class="reader-header">
             <h3 id="readerTitle">Book Title</h3>
             <div class="reader-actions">
-                <button id="downloadBtn" class="reader-btn download-btn">⬇️ Download PDF</button>
+                <button id="downloadBtn" class="reader-btn download-btn">⬇️ Download File</button>
                 <button id="closeReader" class="reader-btn close-btn">✖ Close</button>
             </div>
         </div>
