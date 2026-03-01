@@ -9,10 +9,77 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="style.css?v=3">
-</head>
-<body>
+    <link rel="stylesheet" href="style.css">
 
+    <style>
+        /* ==================== REQUEST A BOOK UI ==================== */
+        .request-btn {
+            background: #ffffff !important;
+            color: #000000 !important;
+            font-weight: 600 !important;
+            padding: 12px 24px !important;
+            border-radius: 50px !important;
+            border: none !important;
+            cursor: pointer !important;
+            font-size: 0.95rem !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 8px !important;
+            transition: transform 0.2s, opacity 0.2s !important;
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1) !important;
+            margin: 0 auto;
+        }
+        .request-btn:hover {
+            transform: translateY(-3px) !important;
+            opacity: 0.9 !important;
+        }
+
+        /* Modal Styling */
+        .request-modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
+            z-index: 2000; display: flex; justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none; transition: 0.3s ease-in-out;
+        }
+        .request-modal-overlay.active { opacity: 1; pointer-events: auto; }
+
+        .request-modal {
+            background: #09090b; border: 1px solid #27272a; border-radius: 16px;
+            width: 90%; max-width: 400px; padding: 25px;
+            transform: translateY(30px); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            text-align: left;
+        }
+        .request-modal-overlay.active .request-modal { transform: translateY(0); }
+
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .modal-header h3 { margin: 0; color: #ffffff; font-size: 1.3rem; }
+        .close-icon { background: transparent; border: none; color: #a1a1aa; cursor: pointer; font-size: 1.2rem; }
+        .close-icon:hover { color: #ef4444; }
+
+        .modal-body p { color: #a1a1aa; font-size: 0.9rem; margin-bottom: 20px; line-height: 1.5; margin-top: 0;}
+        .modal-body strong { color: #ffffff; }
+
+        .modal-body input {
+            width: 100%; background: #18181b; border: 1px solid #27272a;
+            color: #ffffff; padding: 14px; border-radius: 10px; margin-bottom: 15px;
+            outline: none; font-size: 0.95rem; transition: border-color 0.2s;
+            box-sizing: border-box;
+        }
+        .modal-body input:focus { border-color: #ffffff; }
+
+        .submit-req-btn {
+            width: 100%; background: #25D366; color: #ffffff; border: none;
+            padding: 14px; border-radius: 10px; font-weight: 600; cursor: pointer;
+            font-size: 1rem; display: flex; justify-content: center; align-items: center; gap: 8px;
+            transition: background 0.2s;
+        }
+        .submit-req-btn:hover { background: #1ebd57; }
+    </style>
+</head>    
+</body>
+    
     <nav class="navbar">
         <a href="index.html" class="back-link">← Back to Home</a>
         <div class="logo">Edu<span>Hub.</span></div>
